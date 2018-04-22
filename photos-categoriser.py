@@ -1,8 +1,18 @@
 
 # Libraries
 import os
+import errno
 import cv2
 import itertools
+
+
+# This function will delete a file if it exists, taken from https://stackoverflow.com/questions/10840533/most-pythonic-way-to-delete-a-file-which-may-not-exist
+def silentremove(filename):
+    try:
+        os.remove(filename)
+    except OSError as e: # this would be "except OSError, e:" before Python 2.6
+        if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise # re-raise exception if a different error occurred
 
 
 # This function takes an image and finds a face in it, returning the grayscale face detected
@@ -46,7 +56,7 @@ def prepare_training_data(data_folder_path, scale_factor, min_neighb, save_faces
          
         # For each image check if it contains a face and if so add it to the output
         for image_name in subject_images_names:
-            # If the image is one of the saved outputs showing 
+            # If the image is one of the saved outputs showing the face square then skip it
             if '_face.' in image_name:
                 continue
             
@@ -74,7 +84,9 @@ def prepare_training_data(data_folder_path, scale_factor, min_neighb, save_faces
                     cv2.destroyAllWindows()
                 
                 if save_faces:
-                    cv2.imwrite(os.path.join(subject_dir_path, image_name.replace('.', '_face.')), image_with_rect)
+                    output_file_name = os.path.join(subject_dir_path, image_name.replace('.', '_face.'))
+                    silentremove(output_file_name)
+                    cv2.imwrite(output_file_name, image_with_rect)
             
             # If a face is detected then add it to output
             if face is not None:
