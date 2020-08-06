@@ -1,5 +1,3 @@
-/database_secrets.py
 /__pycache__
-/old
-/img/training/*
-/img/test/*
+/img/training
+/img/test
